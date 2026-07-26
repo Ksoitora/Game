@@ -9,6 +9,7 @@ var height: int = 15
 var tile_size: int = 64
 var cells: Dictionary = {}  # Dictionnaire pour stocker les données des cases
 var is_initialized: bool = false
+var selected_cell: Vector2i = Vector2i(-1, -1)
 
 func _ready() -> void:
 	print("[GRID] Grid initialisée")
@@ -31,6 +32,11 @@ func initialize(grid_width: int, grid_height: int) -> void:
 			}
 	
 	is_initialized = true
+	
+	# Centrer la caméra sur la grille
+	var center_pos = get_world_position(width / 2, height / 2)
+	position = -center_pos + get_viewport().get_visible_rect().size / 2
+	
 	queue_redraw()
 	print("[GRID] Grille créée: ", width, "x", height, " cases")
 
@@ -39,15 +45,18 @@ func get_cell_id(x: int, y: int) -> String:
 	return str(x) + "," + str(y)
 
 func get_world_position(grid_x: int, grid_y: int) -> Vector2:
-	"""Convertit les coordonnées de la grille en position mondiale isométrique"""
+	"""Convertit les coordonnées de la grille en position mondiale isométrique (style Dofus)"""
 	var iso_x = (float(grid_x) - float(grid_y)) * float(tile_size) / 2.0
 	var iso_y = (float(grid_x) + float(grid_y)) * float(tile_size) / 4.0
 	return Vector2(iso_x, iso_y)
 
 func get_grid_position(world_pos: Vector2) -> Vector2i:
 	"""Convertit une position mondiale en coordonnées de grille"""
-	var grid_x = int((world_pos.x / (float(tile_size) / 2.0) + world_pos.y / (float(tile_size) / 4.0)) / 2.0)
-	var grid_y = int((world_pos.y / (float(tile_size) / 4.0) - world_pos.x / (float(tile_size) / 2.0)) / 2.0)
+	# Ajuster pour la position de la node Grid
+	var local_pos = world_pos - global_position
+	
+	var grid_x = int((local_pos.x / (float(tile_size) / 2.0) + local_pos.y / (float(tile_size) / 4.0)) / 2.0)
+	var grid_y = int((local_pos.y / (float(tile_size) / 4.0) - local_pos.x / (float(tile_size) / 2.0)) / 2.0)
 	return Vector2i(grid_x, grid_y)
 
 func is_valid_position(x: int, y: int) -> bool:
@@ -74,6 +83,16 @@ func set_cell_walkable(x: int, y: int, walkable: bool) -> void:
 		cells[cell_id]["walkable"] = walkable
 		queue_redraw()
 
+func set_selected_cell(x: int, y: int) -> void:
+	"""Sélectionne une case"""
+	if is_valid_position(x, y):
+		selected_cell = Vector2i(x, y)
+		queue_redraw()
+
+func get_selected_cell() -> Vector2i:
+	"""Retourne la case sélectionnée"""
+	return selected_cell
+
 func get_neighbor_cells(x: int, y: int) -> Array:
 	"""Retourne les cases voisines (jusqu'à 6 en isométrique)"""
 	var neighbors = []
@@ -92,7 +111,7 @@ func get_neighbor_cells(x: int, y: int) -> Array:
 	return neighbors
 
 func _draw() -> void:
-	"""Dessine la grille avec des rectangles"""
+	"""Dessine la grille avec des losanges isométriques"""
 	# Ne rien dessiner si la grille n'est pas initialisée
 	if not is_initialized or cells.is_empty():
 		return
@@ -114,7 +133,11 @@ func _draw() -> void:
 			# Déterminer la couleur en fonction de l'état
 			var color = Color.GRAY
 			var cell_id = get_cell_id(x, y)
-			if cell_id in cells:
+			
+			# Vérifier si c'est la case sélectionnée
+			if selected_cell == Vector2i(x, y):
+				color = Color.YELLOW
+			elif cell_id in cells:
 				if cells[cell_id]["occupied"]:
 					color = Color.RED
 				elif not cells[cell_id]["walkable"]:
