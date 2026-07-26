@@ -8,6 +8,7 @@ var width: int = 15
 var height: int = 15
 var tile_size: int = 64
 var cells: Dictionary = {}  # Dictionnaire pour stocker les données des cases
+var is_initialized: bool = false
 
 func _ready() -> void:
 	print("[GRID] Grid initialisée")
@@ -29,6 +30,8 @@ func initialize(grid_width: int, grid_height: int) -> void:
 				"entity": null
 			}
 	
+	is_initialized = true
+	queue_redraw()
 	print("[GRID] Grille créée: ", width, "x", height, " cases")
 
 func get_cell_id(x: int, y: int) -> String:
@@ -62,12 +65,14 @@ func set_cell_occupied(x: int, y: int, occupied: bool) -> void:
 	var cell_id = get_cell_id(x, y)
 	if cell_id in cells:
 		cells[cell_id]["occupied"] = occupied
+		queue_redraw()
 
 func set_cell_walkable(x: int, y: int, walkable: bool) -> void:
 	"""Marque une case comme traversable ou non"""
 	var cell_id = get_cell_id(x, y)
 	if cell_id in cells:
 		cells[cell_id]["walkable"] = walkable
+		queue_redraw()
 
 func get_neighbor_cells(x: int, y: int) -> Array:
 	"""Retourne les cases voisines (jusqu'à 6 en isométrique)"""
@@ -88,6 +93,10 @@ func get_neighbor_cells(x: int, y: int) -> Array:
 
 func _draw() -> void:
 	"""Dessine la grille avec des rectangles"""
+	# Ne rien dessiner si la grille n'est pas initialisée
+	if not is_initialized or cells.is_empty():
+		return
+	
 	for x in range(width):
 		for y in range(height):
 			var world_pos = get_world_position(x, y)
@@ -104,10 +113,12 @@ func _draw() -> void:
 			
 			# Déterminer la couleur en fonction de l'état
 			var color = Color.GRAY
-			if cells[get_cell_id(x, y)]["occupied"]:
-				color = Color.RED
-			elif not cells[get_cell_id(x, y)]["walkable"]:
-				color = Color.BLACK
+			var cell_id = get_cell_id(x, y)
+			if cell_id in cells:
+				if cells[cell_id]["occupied"]:
+					color = Color.RED
+				elif not cells[cell_id]["walkable"]:
+					color = Color.BLACK
 			
 			# Dessiner le losange
 			draw_colored_polygon(points, color)
