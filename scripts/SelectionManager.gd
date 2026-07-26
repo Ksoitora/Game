@@ -5,6 +5,7 @@ class_name SelectionManager
 # Détection et sélection des cases au clic
 
 var grid: Grid
+var game_manager: GameManager
 var selected_cell: Vector2i = Vector2i(-1, -1)
 var selection_range: int = 1  # Portée de sélection
 
@@ -17,14 +18,29 @@ func set_grid(new_grid: Grid) -> void:
 	"""Définit la grille à utiliser"""
 	grid = new_grid
 
+func set_game_manager(new_game_manager: GameManager) -> void:
+	"""Définit le gestionnaire de jeu"""
+	game_manager = new_game_manager
+
 func _input(event: InputEvent) -> void:
 	"""Gère les clics de la souris"""
+	if not game_manager:
+		return
+	
 	if event is InputEventMouseButton:
-		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			if grid:
-				var clicked_cell = grid.get_grid_position(event.position)
-				if grid.is_valid_position(clicked_cell.x, clicked_cell.y):
-					select_cell(clicked_cell.x, clicked_cell.y)
+		if event.pressed:
+			var clicked_cell = grid.get_grid_position(event.position)
+			
+			if not grid.is_valid_position(clicked_cell.x, clicked_cell.y):
+				return
+			
+			# Clic gauche = sélectionner une case
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				select_cell(clicked_cell.x, clicked_cell.y)
+			
+			# Clic droit = se déplacer vers la case
+			elif event.button_index == MOUSE_BUTTON_RIGHT:
+				move_to_cell(clicked_cell.x, clicked_cell.y)
 
 func select_cell(x: int, y: int) -> void:
 	"""Sélectionne une case"""
@@ -39,11 +55,32 @@ func select_cell(x: int, y: int) -> void:
 	# Calculer les mouvements valides
 	calculate_valid_moves()
 
+func move_to_cell(x: int, y: int) -> void:
+	"""Déplace le héros vers une case"""
+	var player = game_manager.get_player()
+	
+	if not player:
+		print("[SELECTION] Pas de héros!")
+		return
+	
+	# Essayer de déplacer le héros
+	if game_manager.move_character(player, x, y):
+		print("[SELECTION] Héros déplacé avec succès!")
+		# Réinitialiser la sélection
+		selected_cell = Vector2i(-1, -1)
+		grid.set_selected_cell(-1, -1)
+	else:
+		print("[SELECTION] Déplacement impossible!")
+
 func calculate_valid_moves() -> void:
 	"""Calcule les mouvements valides à partir de la case sélectionnée"""
 	valid_moves.clear()
 	
 	if selected_cell.x == -1:
+		return
+	
+	var player = game_manager.get_player()
+	if not player:
 		return
 	
 	# BFS (Breadth-First Search) pour trouver les cases accessibles
@@ -56,7 +93,7 @@ func calculate_valid_moves() -> void:
 	while queue.size() > 0:
 		var current = queue.pop_front()
 		
-		if current["distance"] < selection_range:
+		if current["distance"] < player.current_movement_points:
 			var neighbors = grid.get_neighbor_cells(current["x"], current["y"])
 			
 			for neighbor in neighbors:
