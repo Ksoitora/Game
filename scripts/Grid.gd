@@ -10,6 +10,7 @@ var tile_size: int = 64
 var cells: Dictionary = {}  # Dictionnaire pour stocker les données des cases
 var is_initialized: bool = false
 var selected_cell: Vector2i = Vector2i(-1, -1)
+var characters: Array = []  # Liste des personnages
 
 func _ready() -> void:
 	print("[GRID] Grid initialisée")
@@ -42,6 +43,11 @@ func center_camera() -> void:
 	"""Centre la caméra sur la grille"""
 	var center_pos = get_world_position(width / 2, height / 2)
 	position = -center_pos + get_viewport().get_visible_rect().size / 2
+
+func set_characters(chars: Array) -> void:
+	"""Définit la liste des personnages à afficher"""
+	characters = chars
+	queue_redraw()
 
 func get_cell_id(x: int, y: int) -> String:
 	"""Retourne un ID unique pour une case"""
@@ -88,9 +94,11 @@ func set_cell_walkable(x: int, y: int, walkable: bool) -> void:
 
 func set_selected_cell(x: int, y: int) -> void:
 	"""Sélectionne une case"""
-	if is_valid_position(x, y):
+	if x == -1 or y == -1:
+		selected_cell = Vector2i(-1, -1)
+	elif is_valid_position(x, y):
 		selected_cell = Vector2i(x, y)
-		queue_redraw()
+	queue_redraw()
 
 func get_selected_cell() -> Vector2i:
 	"""Retourne la case sélectionnée"""
@@ -114,7 +122,7 @@ func get_neighbor_cells(x: int, y: int) -> Array:
 	return neighbors
 
 func _draw() -> void:
-	"""Dessine la grille avec des losanges isométriques"""
+	"""Dessine la grille avec des losanges isométriques et les personnages"""
 	# Ne rien dessiner si la grille n'est pas initialisée
 	if not is_initialized or cells.is_empty():
 		return
@@ -149,3 +157,18 @@ func _draw() -> void:
 			# Dessiner le losange
 			draw_colored_polygon(points, color)
 			draw_polyline(points, Color.WHITE, 1.0)
+	
+	# Dessiner les personnages
+	for character in characters:
+		draw_character(character)
+
+func draw_character(character: Character) -> void:
+	"""Dessine un personnage sur la grille"""
+	var world_pos = get_world_position(character.grid_x, character.grid_y)
+	var radius = tile_size / 4.0
+	
+	# Dessiner le cercle du personnage
+	draw_circle(world_pos, radius, character.color)
+	
+	# Ajouter une bordure
+	draw_arc(world_pos, radius, 0, TAU, 16, Color.WHITE, 2.0)
