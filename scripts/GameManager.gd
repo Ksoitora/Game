@@ -25,6 +25,5 @@ func _process(delta: float) -> void:
 	pass
 
 func _input(event: InputEvent) -> void:
-	# Passer les événements d'entrée au gestionnaire de sélection
-	if event is InputEventMouseButton:
-		selection_manager.on_mouse_click(event)
+	# Les événements d'entrée sont gérés directement par SelectionManager via _input()
+	pass
