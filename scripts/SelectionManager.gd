@@ -22,18 +22,19 @@ func set_grid(new_grid: Grid) -> void:
 func _process(_delta: float) -> void:
 	"""Met à jour le survol de la souris chaque frame"""
 	if grid:
-		var mouse_pos = get_global_mouse_position()
+		var mouse_pos = get_local_mouse_position()
 		hovered_cell = grid.get_grid_position(mouse_pos)
 		
 		# Vérifier si la case survolée est valide
 		if not grid.is_valid_position(hovered_cell.x, hovered_cell.y):
 			hovered_cell = Vector2i(-1, -1)
 
-func on_mouse_click(event: InputEventMouseButton) -> void:
+func _input(event: InputEvent) -> void:
 	"""Gère les clics de la souris"""
-	if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if grid and grid.is_valid_position(hovered_cell.x, hovered_cell.y):
-			select_cell(hovered_cell.x, hovered_cell.y)
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			if grid and grid.is_valid_position(hovered_cell.x, hovered_cell.y):
+				select_cell(hovered_cell.x, hovered_cell.y)
 
 func select_cell(x: int, y: int) -> void:
 	"""Sélectionne une case"""
