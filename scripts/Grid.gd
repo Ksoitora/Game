@@ -87,8 +87,28 @@ func get_neighbor_cells(x: int, y: int) -> Array:
 	return neighbors
 
 func _draw() -> void:
-	"""Dessine la grille pour le debug"""
+	"""Dessine la grille avec des rectangles"""
 	for x in range(width):
 		for y in range(height):
 			var world_pos = get_world_position(x, y)
-			draw_circle(world_pos, 5, Color.WHITE)
+			var half_size = tile_size / 2.0
+			var quarter_size = tile_size / 4.0
+			
+			# Créer les points pour un losange isométrique
+			var points = PackedVector2Array([
+				world_pos + Vector2(half_size, 0),      # Droite
+				world_pos + Vector2(0, quarter_size),   # Bas
+				world_pos + Vector2(-half_size, 0),     # Gauche
+				world_pos + Vector2(0, -quarter_size)   # Haut
+			])
+			
+			# Déterminer la couleur en fonction de l'état
+			var color = Color.GRAY
+			if cells[get_cell_id(x, y)]["occupied"]:
+				color = Color.RED
+			elif not cells[get_cell_id(x, y)]["walkable"]:
+				color = Color.BLACK
+			
+			# Dessiner le losange
+			draw_colored_polygon(points, color)
+			draw_polyline(points, Color.WHITE, 1.0)
