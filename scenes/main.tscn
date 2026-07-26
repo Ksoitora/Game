@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1234567890ab"]
+
+[ext_resource type="Script" path="res://scripts/GameManager.gd"]
+
+[node name="Main" type="Node2D"]
+script = SubResource("GDScript_1")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("GameManager")
+
+[node name="GridContainer" type="Node2D" parent="."]
+
+[node name="SelectionManager" type="Node" parent="."]
