@@ -13,6 +13,9 @@ var selected_cell: Vector2i = Vector2i(-1, -1)
 
 func _ready() -> void:
 	print("[GRID] Grid initialisée")
+	# Centrer la caméra sur la grille après qu'elle soit dans la scène
+	if is_initialized:
+		center_camera()
 
 func initialize(grid_width: int, grid_height: int) -> void:
 	"""Initialise la grille avec les dimensions spécifiées"""
@@ -32,13 +35,13 @@ func initialize(grid_width: int, grid_height: int) -> void:
 			}
 	
 	is_initialized = true
-	
-	# Centrer la caméra sur la grille
-	var center_pos = get_world_position(width / 2, height / 2)
-	position = -center_pos + get_viewport().get_visible_rect().size / 2
-	
 	queue_redraw()
 	print("[GRID] Grille créée: ", width, "x", height, " cases")
+
+func center_camera() -> void:
+	"""Centre la caméra sur la grille"""
+	var center_pos = get_world_position(width / 2, height / 2)
+	position = -center_pos + get_viewport().get_visible_rect().size / 2
 
 func get_cell_id(x: int, y: int) -> String:
 	"""Retourne un ID unique pour une case"""
