@@ -33,6 +33,7 @@ func select_cell(x: int, y: int) -> void:
 		return
 	
 	selected_cell = Vector2i(x, y)
+	grid.set_selected_cell(x, y)
 	print("[SELECTION] Case sélectionnée: ", x, ",", y)
 	
 	# Calculer les mouvements valides
@@ -79,4 +80,5 @@ func get_selected_cell() -> Vector2i:
 func clear_selection() -> void:
 	"""Efface la sélection actuelle"""
 	selected_cell = Vector2i(-1, -1)
+	grid.set_selected_cell(-1, -1)
 	valid_moves.clear()
