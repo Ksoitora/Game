@@ -2,14 +2,12 @@ extends Node
 class_name SelectionManager
 
 # SelectionManager - Gère la sélection des cases de la grille
-# Détection du survol et de la sélection des cases
+# Détection et sélection des cases au clic
 
 var grid: Grid
 var selected_cell: Vector2i = Vector2i(-1, -1)
-var hovered_cell: Vector2i = Vector2i(-1, -1)
 var selection_range: int = 1  # Portée de sélection
 
-var selected_cells: Array = []  # Cellules actuellement sélectionnées
 var valid_moves: Array = []  # Mouvements valides
 
 func _ready() -> void:
@@ -19,22 +17,14 @@ func set_grid(new_grid: Grid) -> void:
 	"""Définit la grille à utiliser"""
 	grid = new_grid
 
-func _process(_delta: float) -> void:
-	"""Met à jour le survol de la souris chaque frame"""
-	if grid:
-		var mouse_pos = Input.get_mouse_position()
-		hovered_cell = grid.get_grid_position(mouse_pos)
-		
-		# Vérifier si la case survolée est valide
-		if not grid.is_valid_position(hovered_cell.x, hovered_cell.y):
-			hovered_cell = Vector2i(-1, -1)
-
 func _input(event: InputEvent) -> void:
 	"""Gère les clics de la souris"""
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			if grid and grid.is_valid_position(hovered_cell.x, hovered_cell.y):
-				select_cell(hovered_cell.x, hovered_cell.y)
+			if grid:
+				var clicked_cell = grid.get_grid_position(event.position)
+				if grid.is_valid_position(clicked_cell.x, clicked_cell.y):
+					select_cell(clicked_cell.x, clicked_cell.y)
 
 func select_cell(x: int, y: int) -> void:
 	"""Sélectionne une case"""
@@ -82,10 +72,6 @@ func is_cell_valid(x: int, y: int) -> bool:
 	"""Vérifie si une case est un mouvement valide"""
 	return Vector2i(x, y) in valid_moves
 
-func get_hovered_cell() -> Vector2i:
-	"""Retourne la case survolée"""
-	return hovered_cell
-
 func get_selected_cell() -> Vector2i:
 	"""Retourne la case sélectionnée"""
 	return selected_cell
@@ -93,5 +79,4 @@ func get_selected_cell() -> Vector2i:
 func clear_selection() -> void:
 	"""Efface la sélection actuelle"""
 	selected_cell = Vector2i(-1, -1)
-	selected_cells.clear()
 	valid_moves.clear()
