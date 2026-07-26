@@ -37,14 +37,14 @@ func get_cell_id(x: int, y: int) -> String:
 
 func get_world_position(grid_x: int, grid_y: int) -> Vector2:
 	"""Convertit les coordonnées de la grille en position mondiale isométrique"""
-	var iso_x = (grid_x - grid_y) * tile_size / 2
-	var iso_y = (grid_x + grid_y) * tile_size / 4
+	var iso_x = (float(grid_x) - float(grid_y)) * float(tile_size) / 2.0
+	var iso_y = (float(grid_x) + float(grid_y)) * float(tile_size) / 4.0
 	return Vector2(iso_x, iso_y)
 
 func get_grid_position(world_pos: Vector2) -> Vector2i:
 	"""Convertit une position mondiale en coordonnées de grille"""
-	var grid_x = int((world_pos.x / (tile_size / 2) + world_pos.y / (tile_size / 4)) / 2)
-	var grid_y = int((world_pos.y / (tile_size / 4) - world_pos.x / (tile_size / 2)) / 2)
+	var grid_x = int((world_pos.x / (float(tile_size) / 2.0) + world_pos.y / (float(tile_size) / 4.0)) / 2.0)
+	var grid_y = int((world_pos.y / (float(tile_size) / 4.0) - world_pos.x / (float(tile_size) / 2.0)) / 2.0)
 	return Vector2i(grid_x, grid_y)
 
 func is_valid_position(x: int, y: int) -> bool:
