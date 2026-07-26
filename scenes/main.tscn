@@ -1,13 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://b1234567890ab"]
+[gd_scene load_steps=3 format=3 uid="uid://b1234567890ab"]
 
-[ext_resource type="Script" path="res://scripts/GameManager.gd"]
+[ext_resource type="Script" path="res://scripts/GameManager.gd" id="1_gamemanager"]
+[ext_resource type="Script" path="res://scripts/Grid.gd" id="2_grid"]
+[ext_resource type="Script" path="res://scripts/SelectionManager.gd" id="3_selection"]
 
 [node name="Main" type="Node2D"]
-script = SubResource("GDScript_1")
-
-[node name="GameManager" type="Node" parent="."]
-script = ExtResource("GameManager")
+script = ExtResource("1_gamemanager")
 
 [node name="GridContainer" type="Node2D" parent="."]
+script = ExtResource("2_grid")
 
 [node name="SelectionManager" type="Node" parent="."]
+script = ExtResource("3_selection")
