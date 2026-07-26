@@ -22,7 +22,7 @@ func set_grid(new_grid: Grid) -> void:
 func _process(_delta: float) -> void:
 	"""Met à jour le survol de la souris chaque frame"""
 	if grid:
-		var mouse_pos = get_global_mouse_position()
+		var mouse_pos = Input.get_mouse_position()
 		hovered_cell = grid.get_grid_position(mouse_pos)
 		
 		# Vérifier si la case survolée est valide
